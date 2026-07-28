@@ -119,6 +119,29 @@ function previewFromBuilder(){saveActivePassage();let populated=builderSections.
 })();
 </script>
 <script>
+(() => {
+  const answerBox=document.getElementById('groupAnswers');
+  if(!answerBox) return;
+  answerBox.insertAdjacentHTML('beforebegin', `<input id="groupNumbers" placeholder="Số câu nếu cần, ví dụ: 31 hoặc 31-33" style="width:100%;padding:8px;margin-top:6px"><textarea id="groupOptions" placeholder="Lựa chọn / danh sách dùng chung cho cả Group (mỗi dòng một lựa chọn: A. ...\nB. ...\nC. ...)" style="width:100%;min-height:75px;padding:8px;margin-top:6px"></textarea>`);
+  const expandNumbers=raw=>raw.split(',').flatMap(part=>{const m=part.trim().match(/^(\d+)\s*-\s*(\d+)$/);if(m){let a=+m[1],b=+m[2];return Array.from({length:Math.max(0,b-a+1)},(_,i)=>String(a+i))}return /^\d+$/.test(part.trim())?[part.trim()]:[]});
+  document.getElementById('addQuestionGroup').onclick=()=>{
+    const groupTitle=document.getElementById('groupTitle').value.trim()||'Nhóm câu hỏi';
+    const instruction=document.getElementById('groupInstruction').value.trim();
+    const content=document.getElementById('groupContent').value.trim();
+    const kind=document.getElementById('groupType').value;
+    const shared=document.getElementById('groupOptions').value.trim();
+    const answers={};answerBox.value.split(/\n/).forEach(row=>{const m=row.match(/^\s*(\d+)\s*[:.)-]\s*(.+)$/);if(m)answers[m[1]]=m[2].trim()});
+    let children=[];
+    if(kind==='completion') children=[...new Set([...content.matchAll(/(?:^|\s)(\d{1,2})\s*\.{3,}/g)].map(m=>m[1]))].map(n=>({n,text:'Điền đáp án vào chỗ trống'}));
+    else children=content.split(/\n/).map(row=>{const m=row.match(/^\s*(\d+)\s*[.)]\s*(.+)$/);return m?{n:m[1],text:m[2]}:null}).filter(Boolean);
+    if(!children.length) children=expandNumbers(document.getElementById('groupNumbers').value).map(n=>({n,text:content||'Nội dung câu hỏi'}));
+    if(!children.length)return alert('Dán các câu có đánh số, hoặc nhập dải số câu.');
+    children.forEach((child,i)=>{const q=newBuilderQuestion(kind);q.text=child.text;q.answer=answers[child.n]||'';q.options=shared||q.options;q.sourceNumber=child.n;q.groupStart=i===0;q.groupTitle=groupTitle;q.groupInstruction=instruction;q.groupContent=kind==='completion'?content:'';builderQuestions.push(q)});
+    renderBuilderQuestions();
+  };
+})();
+</script>
+<script>
 previewFromBuilder=function(){saveActivePassage();let populated=builderSections.filter(s=>s.title.trim()&&s.passage.trim());if(!populated.length||populated.some(s=>!s.questions.length||s.questions.some(q=>!q.text.trim()||!q.answer.trim()))){alert('Mỗi phần cần có tiêu đề, nội dung và câu hỏi có đáp án.');return}let number=0,questions=[];populated.forEach((s,si)=>s.questions.forEach(q=>{let n=q.sourceNumber?Number(q.sourceNumber):number+1;number=Math.max(number,n);let answers=q.answer.split('|').map(x=>x.trim()).filter(Boolean),options=q.options.split(/\r?\n/).filter(Boolean);let type=q.type==='tfng'||q.type==='ynng'?'choice':q.type==='mcq'?'singleChoice':q.type==='multi'?'multipleChoice':q.type==='matching'?'matching':'text';questions.push({n,section:skillConfig[builderSkill].labels[si],text:q.text,answers,type,options,image:q.image,groupStart:q.groupStart,groupTitle:q.groupTitle,groupInstruction:q.groupInstruction,groupContent:q.groupContent})}));let test={id:'test-'+Date.now(),title:`${skillConfig[builderSkill].name} Practice`,passage:populated.map((s,i)=>`${skillConfig[builderSkill].labels[i]}: ${s.title}\n\n${s.passage}`).join('\n\n'),questions,created:true};tests.unshift(test);save();closeModal();openTest(test.id)};
 $('#previewBuilder').onclick=previewFromBuilder;
 </script>
