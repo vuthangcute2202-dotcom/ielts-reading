@@ -63,4 +63,19 @@ function renderBuilderQuestions(){let box=$('#builderQuestions');box.innerHTML=b
 function previewFromBuilder(){saveActivePassage();let populated=builderSections.filter(s=>s.title.trim()&&s.passage.trim());if(!populated.length||populated.some(s=>!s.questions.length||s.questions.some(q=>!q.text.trim()||!q.answer.trim()))){alert('Mỗi phần cần có tiêu đề, nội dung và câu hỏi có đáp án.');return}let number=0,questions=[];populated.forEach((s,si)=>s.questions.forEach(q=>{let answers=q.answer.split('|').map(x=>x.trim()).filter(Boolean),options=q.options.split(/\r?\n/).filter(Boolean);let type=q.type==='tfng'||q.type==='ynng'?'choice':q.type==='mcq'?'singleChoice':q.type==='multi'?'multipleChoice':q.type==='matching'?'matching':'text';questions.push({n:++number,section:skillConfig[builderSkill].labels[si],text:q.text,answers,type,options,image:q.image})}));let test={id:'test-'+Date.now(),title:`${skillConfig[builderSkill].name} Practice`,passage:populated.map((s,i)=>`${skillConfig[builderSkill].labels[i]}: ${s.title}\n\n${s.passage}`).join('\n\n'),questions,created:true};tests.unshift(test);save();closeModal();openTest(test.id)}
 ['#openBuilder','#openBuilderNav','#pasteBtn','#createExamCard'].forEach(s=>$(s).onclick=openModal);$('#sampleBtn').onclick=()=>openTest(seed.id);$('#builderExamType').onchange=switchSkill;$('#builderImage').onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{builderSections[builderActive].image=r.result;$('#builderMediaPreview').innerHTML=`<img src="${r.result}" style="max-width:180px;max-height:110px;border:1px solid #cbd5e1;border-radius:7px">`};r.readAsDataURL(f)};$('#addBuilderQuestion').onclick=()=>{builderQuestions.push(newBuilderQuestion('short'));renderBuilderQuestions()};$('#previewBuilder').onclick=previewFromBuilder;document.querySelectorAll('[data-close]').forEach(x=>x.onclick=closeModal);$('#submitTest').onclick=grade;$('#exitTest').onclick=exitTest;$('#closeResult').onclick=()=>$('#result').classList.remove('open');$('#exportBtn').onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(tests,null,2)],{type:'application/json'}));a.download='reading-lab-library.json';a.click();URL.revokeObjectURL(a.href)};renderTests();
 </script>
+<script>
+(() => {
+  const target = document.getElementById('questionBuilderBlock');
+  if (!target) return;
+  target.insertAdjacentHTML('afterbegin', `<div class="card" style="padding:12px;margin:12px 0"><b>Dán cả nhóm câu hỏi</b><select id="bulkQuestionType" style="margin:8px 0;width:100%;padding:7px"><option value="tfng">TRUE / FALSE / NOT GIVEN</option><option value="short">Short answer / Completion</option><option value="mcq">Multiple choice (chọn 1)</option><option value="multi">Multiple choice (chọn nhiều)</option><option value="matching">Matching</option></select><textarea id="bulkQuestionInput" placeholder="Copy nguyên Questions 1-6 vào đây..." style="width:100%;min-height:100px;padding:8px"></textarea><button class="secondary" id="importBulkQuestions" type="button" style="margin-top:8px">Tách thành câu hỏi</button></div>`);
+  document.getElementById('importBulkQuestions').onclick = () => {
+    const raw = document.getElementById('bulkQuestionInput').value.trim();
+    const type = document.getElementById('bulkQuestionType').value;
+    const rows = raw.split(/\n(?=\s*\d+\s+)/).map(x => x.replace(/\s+/g,' ').trim()).filter(x => /^\d+\s+/.test(x));
+    if (!rows.length) return alert('Hãy dán mỗi câu trên một dòng, bắt đầu bằng số câu.');
+    rows.forEach(row => { const m=row.match(/^(\d+)\s+(.+)/); const q=newBuilderQuestion(type); q.text=m[2]; builderQuestions.push(q); });
+    renderBuilderQuestions();
+  };
+})();
+</script>
 </body></html>
