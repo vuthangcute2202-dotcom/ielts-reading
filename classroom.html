@@ -11,15 +11,15 @@
 <header><div class="brand">IELTS Classroom<span>TEACHER · STUDENT PORTAL</span></div><button class="secondary hide" id="signOut">Đăng xuất</button></header>
 <main class="wrap">
   <section class="card auth" id="authView">
-    <h1>Đăng nhập lớp học</h1><p class="muted">Giáo viên tạo tài khoản học sinh; học sinh chỉ cần đăng nhập bằng tài khoản được cấp.</p>
+    <h1>IELTS Classroom</h1><p class="muted">Đăng nhập để vào thư viện luyện tập và lớp học của bạn.</p>
     <div id="message" class="notice"></div>
-    <div id="loginForm"><label>Email</label><input id="email" type="email" placeholder="teacher@example.com"><label>Mật khẩu</label><input id="password" type="password" placeholder="••••••••"><p><button id="login">Đăng nhập</button> <button class="secondary" id="showBootstrap">Khởi tạo giáo viên</button></p></div>
+    <div id="loginForm"><label>Email</label><input id="email" type="email" placeholder="email của bạn"><label>Mật khẩu</label><input id="password" type="password" placeholder="••••••••"><p><button id="login">Đăng nhập</button> <button class="secondary" id="showBootstrap">Thiết lập lần đầu (GV)</button></p></div>
     <div id="bootstrapForm" class="hide"><label>Họ tên giáo viên</label><input id="bootName"><label>Email</label><input id="bootEmail" type="email"><label>Mật khẩu mới</label><input id="bootPassword" type="password"><label>Mã khởi tạo quản trị</label><input id="bootCode" type="password"><p class="muted">Mã này được kiểm tra ở máy chủ và chỉ dùng được cho quản trị viên đầu tiên.</p><button id="bootstrap">Tạo tài khoản giáo viên</button> <button class="secondary" id="backLogin">Quay lại</button></div>
   </section>
   <section id="appView" class="hide">
-    <div class="row"><div><h1 id="welcome" style="margin:0">Lớp học</h1><p class="muted" id="roleText"></p></div><a href="index.html?builder=1" class="btn right">Mở trình tạo đề</a></div>
-    <div class="tabs" id="tabs"><button data-tab="assigned" class="active">Bài được giao</button><button data-tab="classes" class="teacherOnly">Lớp học</button><button data-tab="accounts" class="teacherOnly">Tài khoản học sinh</button></div>
-    <div class="panel show" id="assigned"><div class="card"><h2 style="margin-top:0">Bài của bạn</h2><div class="list" id="assignmentList"></div></div></div>
+    <div class="row"><div><h1 id="welcome" style="margin:0">Lớp học</h1><p class="muted" id="roleText"></p></div><a href="index.html?builder=1" class="btn right teacherOnly">Mở trình tạo đề</a></div>
+    <div class="tabs" id="tabs"><button data-tab="assigned" class="active">Thư viện luyện tập</button><button data-tab="classes" class="teacherOnly">Lớp học của tôi</button><button data-tab="accounts" class="teacherOnly">Tài khoản học sinh</button></div>
+    <div class="panel show" id="assigned"><div class="card"><h2 style="margin-top:0">Đề luyện tập</h2><p class="muted">Các đề giáo viên công khai cho toàn bộ học sinh sẽ xuất hiện ở đây. Bài được giao riêng sẽ có nhãn lớp và thời hạn làm bài.</p><div class="list" id="assignmentList"></div></div></div>
     <div class="panel" id="classes"><div class="card"><h2 style="margin-top:0">Tạo lớp</h2><div class="row"><input id="className" placeholder="Ví dụ: IELTS 7.0 – Thứ 3, 5"><button id="createClass">+ Tạo lớp</button></div><div class="list" id="classList"></div></div></div>
     <div class="panel" id="accounts"><div class="card"><h2 style="margin-top:0">Cấp tài khoản</h2><p class="muted">Tài khoản được tạo bằng chức năng máy chủ, không có mật khẩu quản trị trong web.</p><div class="grid"><div><label>Họ tên</label><input id="studentName"></div><div><label>Email đăng nhập</label><input id="studentEmail" type="email"></div><div><label>Mật khẩu tạm</label><input id="studentPassword" type="password"></div><div><label>Vai trò</label><select id="studentRole"><option value="student">Học sinh</option><option value="teacher">Giáo viên</option></select></div></div><p><button id="createUser">Tạo tài khoản</button></p></div></div>
   </section>
