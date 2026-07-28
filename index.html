@@ -11,6 +11,7 @@
     #builderSectionTabs button.active{background:#155eef!important;color:#fff!important;border-color:#155eef!important;box-shadow:0 3px 8px #155eef33}
   </style>
 <script>if(!location.search.includes('builder=1')) location.replace('classroom.html');</script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 <div class="app" id="homeView">
@@ -164,6 +165,25 @@ renderBuilderQuestions=function(){
   box.querySelectorAll('[data-answer-multi]').forEach(el=>el.onchange=e=>{const i=+e.target.dataset.answerMulti;builderQuestions[i].answer=[...box.querySelectorAll(`[data-answer-multi="${i}"]:checked`)].map(x=>x.value).join('|')});
   box.querySelectorAll('[data-delete]').forEach(el=>el.onclick=()=>{builderQuestions.splice(+el.dataset.delete,1);renderBuilderQuestions()});
 };
+</script>
+<script>
+(() => {
+  const groupCard=document.getElementById('groupTitle')?.closest('.card');
+  if(!groupCard) return;
+  groupCard.querySelector('b').textContent='Tạo Group câu hỏi';
+  groupCard.querySelector('.hint').textContent='Chọn dạng, dán nội dung một lần. Đáp án được tải bằng file Excel sau khi tạo xong các Group.';
+  const oldBulk=document.getElementById('bulkQuestionType')?.closest('.card'); if(oldBulk) oldBulk.style.display='none';
+  const answerBox=document.getElementById('groupAnswers'); answerBox.style.display='none';
+  answerBox.insertAdjacentHTML('afterend', `<div style="margin-top:8px;padding:10px;background:#f7f9ff;border-radius:8px"><b>Đáp án</b><div class="hint">Không nhập tại đây. Sau khi tạo xong tất cả câu hỏi, tải một file Excel gồm 2 cột: <code>question_number</code> và <code>answer</code>.</div><input id="answerExcel" type="file" accept=".xlsx,.xls,.csv" style="margin-top:8px"><button class="secondary" id="downloadAnswerTemplate" type="button" style="margin-left:7px">Tải mẫu Excel/CSV</button></div>`);
+  const baseRender=renderBuilderQuestions;
+  renderBuilderQuestions=function(){baseRender();const box=$('#builderQuestions');box.querySelectorAll('[data-answer-select],[data-answer-text]').forEach(el=>el.remove());box.querySelectorAll('[data-answer-multi]').forEach(el=>el.closest('.options')?.remove());box.querySelectorAll('.question-row').forEach(row=>row.insertAdjacentHTML('beforeend','<div class="hint">Đáp án: tải bằng file Excel ở bước cuối.</div>'))};
+  document.getElementById('downloadAnswerTemplate').onclick=()=>{const rows=['question_number,answer','1,TRUE','2,FALSE','7,example answer'];const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));a.download='ielts-answer-template.csv';a.click();URL.revokeObjectURL(a.href)};
+  document.getElementById('answerExcel').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(!window.XLSX)throw new Error('Đang tải trình đọc Excel, hãy thử lại sau vài giây.');const workbook=XLSX.read(await file.arrayBuffer(),{type:'array'});const rows=XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]],{header:1,defval:''});const header=rows.shift().map(x=>String(x).toLowerCase().trim());const ni=header.findIndex(x=>['question_number','number','question','câu','cau'].includes(x));const ai=header.findIndex(x=>['answer','answers','đáp án','dap an'].includes(x));if(ni<0||ai<0)throw new Error('File cần có cột question_number và answer.');const map=new Map(rows.filter(r=>r[ni]!==''&&r[ai]!=='').map(r=>[String(r[ni]).trim(),String(r[ai]).trim()]));let updated=0;builderSections.forEach(s=>s.questions.forEach((q,i)=>{const n=String(q.sourceNumber||i+1);if(map.has(n)){q.answer=map.get(n);updated++}}));renderBuilderQuestions();alert('Đã nạp '+updated+' đáp án từ Excel.')}catch(err){alert(err.message)}};
+})();
+</script>
+<script>
+previewFromBuilder=function(){saveActivePassage();let populated=builderSections.filter(s=>s.title.trim()&&s.passage.trim());if(!populated.length||populated.some(s=>!s.questions.length||s.questions.some(q=>!q.text.trim()))){alert('Mỗi phần cần có tiêu đề, nội dung và câu hỏi.');return}let number=0,questions=[];populated.forEach((s,si)=>s.questions.forEach(q=>{let n=q.sourceNumber?Number(q.sourceNumber):number+1;number=Math.max(number,n);let answers=(q.answer||'').split('|').map(x=>x.trim()).filter(Boolean),options=(q.options||'').split(/\r?\n/).filter(Boolean);let type=q.type==='tfng'||q.type==='ynng'?'choice':q.type==='mcq'?'singleChoice':q.type==='multi'?'multipleChoice':q.type==='matching'?'matching':'text';questions.push({n,section:skillConfig[builderSkill].labels[si],text:q.text,answers,type,options,image:q.image,groupStart:q.groupStart,groupTitle:q.groupTitle,groupInstruction:q.groupInstruction,groupContent:q.groupContent})}));let test={id:'test-'+Date.now(),title:`${skillConfig[builderSkill].name} Practice`,passage:populated.map((s,i)=>`${skillConfig[builderSkill].labels[i]}: ${s.title}\n\n${s.passage}`).join('\n\n'),questions,created:true};tests.unshift(test);save();closeModal();openTest(test.id)};
+$('#previewBuilder').onclick=previewFromBuilder;
 </script>
 <a href="classroom.html" style="position:fixed;right:20px;bottom:20px;z-index:30;background:#102a56;color:#fff;text-decoration:none;padding:11px 15px;border-radius:10px;font-weight:800;box-shadow:0 5px 16px #102a5655">Lớp học · Đăng nhập</a>
 </body></html>
