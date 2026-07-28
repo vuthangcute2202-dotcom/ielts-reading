@@ -17,7 +17,7 @@
     <div id="bootstrapForm" class="hide"><label>Họ tên giáo viên</label><input id="bootName"><label>Email</label><input id="bootEmail" type="email"><label>Mật khẩu mới</label><input id="bootPassword" type="password"><label>Mã khởi tạo quản trị</label><input id="bootCode" type="password"><p class="muted">Mã này được kiểm tra ở máy chủ và chỉ dùng được cho quản trị viên đầu tiên.</p><button id="bootstrap">Tạo tài khoản giáo viên</button> <button class="secondary" id="backLogin">Quay lại</button></div>
   </section>
   <section id="appView" class="hide">
-    <div class="row"><div><h1 id="welcome" style="margin:0">Lớp học</h1><p class="muted" id="roleText"></p></div><a href="index.html" class="btn right">Mở trình tạo đề</a></div>
+    <div class="row"><div><h1 id="welcome" style="margin:0">Lớp học</h1><p class="muted" id="roleText"></p></div><a href="index.html?builder=1" class="btn right">Mở trình tạo đề</a></div>
     <div class="tabs" id="tabs"><button data-tab="assigned" class="active">Bài được giao</button><button data-tab="classes" class="teacherOnly">Lớp học</button><button data-tab="accounts" class="teacherOnly">Tài khoản học sinh</button></div>
     <div class="panel show" id="assigned"><div class="card"><h2 style="margin-top:0">Bài của bạn</h2><div class="list" id="assignmentList"></div></div></div>
     <div class="panel" id="classes"><div class="card"><h2 style="margin-top:0">Tạo lớp</h2><div class="row"><input id="className" placeholder="Ví dụ: IELTS 7.0 – Thứ 3, 5"><button id="createClass">+ Tạo lớp</button></div><div class="list" id="classList"></div></div></div>
